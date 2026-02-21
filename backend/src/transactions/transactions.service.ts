@@ -6,14 +6,22 @@ export class TransactionsService {
   constructor(private prisma: PrismaService) {}
 
   // 1. Create a transaction
-  create(data: any) {
-    return this.prisma.transaction.create({ data });
+  create(data: any, userId: string) {
+    return this.prisma.transaction.create({
+      data: {
+        title: data.title,
+        amount: parseFloat(data.amount),
+        category: data.category,
+        user_id: userId,
+      }
+    });
   }
 
   // 2. Get all transactions
-  findAll() {
+  findAll(userId: string) {
     return this.prisma.transaction.findMany({
-      orderBy: { date: 'desc' } 
+      where: { user_id: userId },
+      orderBy: { createdAt: 'desc' }
     });
   }
 
