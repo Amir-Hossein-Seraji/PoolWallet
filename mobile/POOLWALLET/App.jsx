@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { Home, PlusCircle } from 'lucide-react-native';
 // Screens
 import HomeScreen from './src/screens/HomeScreen';
 import AddScreen from './src/screens/AddScreen';
@@ -14,12 +14,23 @@ import SignupScreen from './src/screens/SignupScreen'; // <--- NEW IMPORT
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// 1. Pass setIsLoggedIn to the AppTabs
 function AppTabs({ setIsLoggedIn }) {
   return (
-    <Tab.Navigator screenOptions={{ headerShown: true, tabBarActiveTintColor: '#007BFF' }}>
+    <Tab.Navigator 
+      screenOptions={({ route }) => ({
+        headerShown: true,
+        tabBarActiveTintColor: '#007BFF',
+        tabBarInactiveTintColor: 'gray',
+        tabBarIcon: ({ color, size }) => {
+          if (route.name === 'Home') {
+            return <Home color={color} size={size} />;
+          } else if (route.name === 'Add') {
+            return <PlusCircle color={color} size={size} />;
+          }
+        },
+      })}
+    >
       <Tab.Screen name="Home" options={{ title: 'My Wallet' }}>
-        {/* Pass it down to HomeScreen! */}
         {props => <HomeScreen {...props} setIsLoggedIn={setIsLoggedIn} />}
       </Tab.Screen>
       <Tab.Screen name="Add" component={AddScreen} options={{ title: 'Add Transaction' }} />

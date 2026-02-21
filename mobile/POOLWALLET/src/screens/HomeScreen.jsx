@@ -1,15 +1,16 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { RefreshControl ,View, Text, FlatList, StyleSheet, TouchableOpacity, Alert,TextInput } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // 1. IMPORT POCKET
 import BalanceCard from '../components/BalanceCard';
-
+import ExpenseChart from '../components/ExpenseChart';
 const API_URL = 'http://localhost:3000/transactions';
 
 export default function HomeScreen({ navigation, setIsLoggedIn }) {
   const [transactions, setTransactions] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
-
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] =useState("")
   // 2. THE SECURE FETCH
   const fetchTransactions = async () => {
     try {
@@ -39,7 +40,11 @@ export default function HomeScreen({ navigation, setIsLoggedIn }) {
       setErrorMsg("Network Error: " + error.message);
     }
   };
-
+  const onRefresh = async () => {
+    setRefreshing(true);      
+    await fetchTransactions(); 
+    setRefreshing(false);       
+  };
   useFocusEffect(
     useCallback(() => {
       fetchTransactions();
@@ -54,12 +59,12 @@ export default function HomeScreen({ navigation, setIsLoggedIn }) {
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}` // <--- SHOW ID HERE TOO!
+          'Authorization': `Bearer ${token}`
         }
       });
 
       if (response.ok) {
-        fetchTransactions(); // Refresh list on success
+        fetchTransactions(); 
       } else {
         Alert.alert("Error", "Failed to delete transaction");
       }
@@ -72,24 +77,48 @@ export default function HomeScreen({ navigation, setIsLoggedIn }) {
   await AsyncStorage.removeItem('userId');
   setIsLoggedIn(false); 
   };
-
+  const filteredTransactions = transactions.filter(transaction => {
+    const title = transaction.title || ""; 
+    return title.toLowerCase().includes(searchQuery.toLowerCase());
+  });
   return (
     <View style={styles.container}>
       {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
-      
-      {/* We add a safety check: only show math if transactions is an actual Array */}
-      {Array.isArray(transactions) && <BalanceCard transactions={transactions} />}
-
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <Text style={styles.listTitle}>Recent Transactions</Text>
-        <TouchableOpacity onPress={handleLogout}>
-          <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 16 }}>Log Out</Text>
-        </TouchableOpacity>
-      </View>
 
       <FlatList
-        data={transactions}
+        data={filteredTransactions}
         keyExtractor={(item) => item.id.toString()}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh} 
+            colors={['#007BFF']} 
+            tintColor="#007BFF"  
+          />
+        }
+        ListHeaderComponent={
+          <>
+            {Array.isArray(transactions) && (
+              <>
+                <BalanceCard transactions={transactions} />
+                <ExpenseChart transactions={transactions} />
+              </>
+            )}
+            <TextInput
+              style={styles.searchInput}
+              placeholder="🔍 Search transactions..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              clearButtonMode="always" 
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, marginTop: 10 }}>
+              <Text style={styles.listTitle}>Recent Transactions</Text>
+              <TouchableOpacity onPress={handleLogout}>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 16 }}>Log Out</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        }
         renderItem={({ item }) => {
           const isIncome = item.amount > 0;
           return (
@@ -110,8 +139,9 @@ export default function HomeScreen({ navigation, setIsLoggedIn }) {
             </View>
           );
         }}
-        // Helpful message if the list is empty
         ListEmptyComponent={<Text style={{textAlign: 'center', marginTop: 20, color: 'gray'}}>No transactions yet!</Text>}
+        contentContainerStyle={{ paddingBottom: 20 }} 
+        showsVerticalScrollIndicator={false} 
       />
     </View>
   );
@@ -128,5 +158,15 @@ const styles = StyleSheet.create({
   cardAmount: { fontSize: 18, fontWeight: 'bold', marginRight: 15 },
   deleteButton: { padding: 5 },
   deleteText: { fontSize: 16 },
-  errorText: { color: 'red', fontSize: 16, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' }
+  errorText: { color: 'red', fontSize: 16, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
+  searchInput: {
+    backgroundColor: 'white',
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    fontSize: 16,
+    marginTop: 15,
+    marginBottom: 5,
+  },
 });
