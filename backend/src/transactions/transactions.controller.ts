@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Request ,Patch } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -22,5 +22,9 @@ export class TransactionsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.transactionsService.remove(id);
+  }
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() data: any) {
+    return this.transactionsService.update(id, data);
   }
 }

@@ -2,8 +2,6 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 export default function BalanceCard({ transactions }) {
-  // 1. The Magic Math! 
-  // We loop through the data and calculate the totals.
   const income = transactions
     .filter(item => item.amount > 0)
     .reduce((sum, item) => sum + item.amount, 0);
@@ -12,7 +10,7 @@ export default function BalanceCard({ transactions }) {
     .filter(item => item.amount < 0)
     .reduce((sum, item) => sum + item.amount, 0);
 
-  const totalBalance = income + expenses; // (expenses are already negative numbers)
+  const totalBalance = income + expenses; 
 
   return (
     <View style={styles.card}>

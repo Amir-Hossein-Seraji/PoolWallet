@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { RefreshControl ,View, Text, FlatList, StyleSheet, TouchableOpacity, Alert,TextInput } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // 1. IMPORT POCKET
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import BalanceCard from '../components/BalanceCard';
 import ExpenseChart from '../components/ExpenseChart';
 const API_URL = 'http://localhost:3000/transactions';
@@ -20,7 +20,7 @@ export default function HomeScreen({ navigation, setIsLoggedIn }) {
       const response = await fetch(API_URL, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`, // <--- SHOW THE ID CARD TO THE BOUNCER!
+          'Authorization': `Bearer ${token}`, 
           'Content-Type': 'application/json'
         }
       });
@@ -28,10 +28,9 @@ export default function HomeScreen({ navigation, setIsLoggedIn }) {
       const data = await response.json();
 
       if (response.ok) {
-        setTransactions(data); // If successful, save the array
+        setTransactions(data);
         setErrorMsg("");
       } else {
-        // If the Bouncer rejects us, don't crash the math!
         setTransactions([]); 
         setErrorMsg(data.message || "Failed to load data");
       }
@@ -122,6 +121,10 @@ export default function HomeScreen({ navigation, setIsLoggedIn }) {
         renderItem={({ item }) => {
           const isIncome = item.amount > 0;
           return (
+            <TouchableOpacity 
+              style={styles.listCard}
+              onPress={() => navigation.navigate('Edit', { transaction: item })}
+            >
             <View style={styles.listCard}>
               <View style={styles.cardLeft}>
                 <Text style={styles.cardTitle}>{item.title}</Text>
@@ -137,6 +140,7 @@ export default function HomeScreen({ navigation, setIsLoggedIn }) {
                 </TouchableOpacity>
               </View>
             </View>
+            </TouchableOpacity>
           );
         }}
         ListEmptyComponent={<Text style={{textAlign: 'center', marginTop: 20, color: 'gray'}}>No transactions yet!</Text>}

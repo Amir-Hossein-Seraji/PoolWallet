@@ -9,8 +9,8 @@ import { Home, PlusCircle } from 'lucide-react-native';
 import HomeScreen from './src/screens/HomeScreen';
 import AddScreen from './src/screens/AddScreen';
 import LoginScreen from './src/screens/LoginScreen';
-import SignupScreen from './src/screens/SignupScreen'; // <--- NEW IMPORT
-
+import SignupScreen from './src/screens/SignupScreen';
+import EditScreen from './src/screens/EditScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -44,14 +44,26 @@ function AuthStack({ setIsLoggedIn }) {
       <Stack.Screen name="Login">
         {props => <LoginScreen {...props} setIsLoggedIn={setIsLoggedIn} />}
       </Stack.Screen>
-      {/* 2. ADD THE SIGNUP SCREEN HERE */}
       <Stack.Screen name="Signup">
         {props => <SignupScreen {...props} setIsLoggedIn={setIsLoggedIn} />}
       </Stack.Screen>
     </Stack.Navigator>
   );
 }
-
+function MainNavigator({ setIsLoggedIn }) {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Tabs" options={{ headerShown: false }}>
+        {props => <AppTabs {...props} setIsLoggedIn={setIsLoggedIn} />}
+      </Stack.Screen>
+      <Stack.Screen 
+        name="Edit" 
+        component={EditScreen} 
+        options={{ title: 'Edit Transaction', headerBackTitle: 'Back' }} 
+      />
+    </Stack.Navigator>
+  );
+}
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(null);
 
@@ -75,7 +87,7 @@ export default function App() {
   return (
     <NavigationContainer>
       {isLoggedIn ? (
-        <AppTabs setIsLoggedIn={setIsLoggedIn} /> // <--- Pass it here
+        <MainNavigator setIsLoggedIn={setIsLoggedIn} /> 
       ) : (
         <AuthStack setIsLoggedIn={setIsLoggedIn} />
       )}

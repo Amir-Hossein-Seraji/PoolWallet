@@ -19,13 +19,11 @@ export default function LoginScreen({ navigation, setIsLoggedIn }) {
       const data = await response.json();
 
       if (response.ok) {
-        // 1. Save the token to the phone's secure storage
         await AsyncStorage.setItem('userToken', data.access_token);
         await AsyncStorage.setItem('userId', data.user.id);
         
         Alert.alert("Success", "Welcome back!");
         
-        // 2. Tell App.jsx that we are logged in!
         setIsLoggedIn(true); 
       } else {
         Alert.alert("Login Failed", data.message || "Something went wrong");

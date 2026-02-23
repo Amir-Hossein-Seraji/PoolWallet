@@ -16,7 +16,16 @@ export class TransactionsService {
       }
     });
   }
-
+  update(id: string, data: any) {
+    return this.prisma.transaction.update({
+      where: { id: id },
+      data: {
+        title: data.title,
+        amount: parseFloat(data.amount),
+        category: data.category,
+      }
+    });
+  }
   // 2. Get all transactions
   findAll(userId: string) {
     return this.prisma.transaction.findMany({
@@ -29,14 +38,6 @@ export class TransactionsService {
   findOne(id: string) {
     return this.prisma.transaction.findUnique({
       where: { id: id }
-    });
-  }
-
-  // 4. Update a transaction
-  update(id: string, updateData: any) {
-    return this.prisma.transaction.update({
-      where: { id: id },
-      data: updateData
     });
   }
 

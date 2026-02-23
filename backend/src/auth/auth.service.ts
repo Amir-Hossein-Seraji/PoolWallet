@@ -44,7 +44,6 @@ export class AuthService {
     return this.generateToken(user.id, user.email);
   }
 
-  // Helper to generate the JWT Token
   private generateToken(userId: string, email: string) {
     const payload = { sub: userId, email: email };
     return {
